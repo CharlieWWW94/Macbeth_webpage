@@ -1,0 +1,15 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}Macbeth Quotes{% endblock %}
+
+{% block content %}
+<h1>Your Search Results:</h1>
+<br>
+{% for quotation in results['quotations'] %}
+<h2>{{quotation['character']}}</h2>
+<h3>Act: {{quotation['act']}} Scene: {{quotation['scene']}}</h3>
+<p>{{quotation['quotation']}}</p>
+<p>{{quotation['theme_1']}} {{quotation['theme_2']}} {{quotation['theme_3']}}</p>
+<br>
+{% endfor %}
+ {% endblock %}

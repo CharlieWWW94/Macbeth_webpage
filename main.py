@@ -25,8 +25,14 @@ def home():
         list_search_params = list(form.data.items())
         test = api_communicator.search(list_search_params)
         print(test)
+        return display_results(test)
 
     return render_template("index.html", form=form)
+
+
+@app.route("/search_results")
+def display_results(results):
+    return render_template("search_results.html", results=results)
 
 
 if __name__ == "__main__":
