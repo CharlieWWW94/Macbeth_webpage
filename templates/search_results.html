@@ -1,15 +1,28 @@
-{% extends 'bootstrap/base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}Macbeth Quotes{% endblock %}
+
+
 
 {% block content %}
-<h1>Your Search Results:</h1>
-<br>
-{% for quotation in results['quotations'] %}
-<h2>{{quotation['character']}}</h2>
-<h3>Act: {{quotation['act']}} Scene: {{quotation['scene']}}</h3>
-<p>{{quotation['quotation']}}</p>
-<p>{{quotation['theme_1']}} {{quotation['theme_2']}} {{quotation['theme_3']}}</p>
-<br>
-{% endfor %}
- {% endblock %}
+{% include 'header.html' %}
+<link rel="stylesheet" href="static\css\styles.css">
+<div class="fluid-container">
+    <div class="row">
+        <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
+        <div class="col-xxl-4 col-xl-6 col-sm-10 mt-5 bg-light shadow-lg rounded results">
+            <h1>Your Search Results:</h1>
+            <br>
+            {% for quotation in results['quotations']%}
+            <h2>{{quotation['character']}}</h2>
+        <h3>Act: {{quotation['act']}} Scene: {{quotation['scene']}}</h3>
+        <p>{{quotation['quotation']}}</p>
+        <p>{{quotation['theme_1']}} {{quotation['theme_2']}} {{quotation['theme_3']}}</p>
+        <br>
+            <hr>
+            {% endfor %}
+        </div>
+        <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
+    </div>
+</div>
+{% endblock %}
+
