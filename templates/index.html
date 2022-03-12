@@ -4,13 +4,25 @@
 
 {% block content %}
 {% include 'header.html' %}
-
+<link rel="stylesheet" href="static\css\styles.css">
 
 <body>
-<h1>Macbeth</h1>
-<h2>Search for Quotations...</h2>
-{{wtf.quick_form(form, novalidate="true")}}
-<button type="button" class="btn-primary btn-lg">Search...</button>
-</body>
+<div class="fluid-container mt-5" style="height: 90%;">
 
+    <div class="row">
+        <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
+        <div class="col-xxl-4 col-xl-6 col-sm-10">
+            <div class="card bg-dark text-light">
+                <img class="card-img-top" src="static/assets/img/background.png" style="height: 10rem; object-fit: cover;">
+                <div class="card-body">
+                    <h1 class="card-title">Search Macbeth...</h1>
+                    {{wtf.quick_form(form, novalidate="true")}}
+                </div>
+            </div>
+        </div>
+        <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
+    </div>
+
+</div>
+</body>
 {% endblock %}
