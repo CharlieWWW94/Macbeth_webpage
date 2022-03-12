@@ -11,18 +11,18 @@
 
     <div class="row">
         <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
-        <div class="col-xxl-4 col-xl-6 col-sm-10">
-            <div class="card bg-dark text-light">
-                <img class="card-img-top" src="static/assets/img/background.png" style="height: 10rem; object-fit: cover;">
-                <div class="card-body">
+        <div class="col-xxl-4 col-xl-6 col-sm-10 mt-5">
+            <div class="shadow-lg card bg-dark text-light">
+                <img class="shadow card-img-top" src="static/assets/img/background.png" style="height: 10rem; object-fit: cover;">
+                <div class="card-body pl-5 pr-5 text-light">
                     <h1 class="card-title">Search Macbeth...</h1>
+                    <p>A simple tool to search for key quotations from William Shakespeare's Macbeth.</p>
                     {{wtf.quick_form(form, novalidate="true")}}
                 </div>
             </div>
         </div>
         <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
     </div>
-
 </div>
 </body>
 {% endblock %}
