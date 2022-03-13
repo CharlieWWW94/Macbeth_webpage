@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, SelectField
 import os
 import api_communicator
+import random
+import sys
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -25,6 +27,7 @@ def home():
         list_search_params = list(form.data.items())
         test = api_communicator.search(list_search_params)
         print(test)
+        session['quotations'] = test['quotations']
         return display_results(test)
 
     return render_template("index.html", form=form)
@@ -33,6 +36,25 @@ def home():
 @app.route("/search_results")
 def display_results(results):
     return render_template("search_results.html", results=results)
+
+
+@app.route("/learn_quotations", methods=["GET"])
+def learn_quotations():
+    quotations_to_learn = session.get('quotations', None)
+    for quotation in quotations_to_learn:
+        quotation_as_list = quotation['quotation'].split()
+        quotation['quotation'] = quotation_as_list
+
+    quotations_to_complete = {'quotations': []}
+    for quotation in quotations_to_learn:
+        to_remove = random.randint(0, int(len(quotation['quotation']) - 1))
+        quotation_to_complete = quotation
+        quotation_to_complete['quotation'][to_remove] = 'X'
+        print(quotation_to_complete)
+        quotations_to_complete['quotations'].append(quotation_to_complete)
+    print(quotations_to_complete)
+
+    return render_template("learn_quotations.html", quotations=quotations_to_complete)
 
 
 if __name__ == "__main__":
