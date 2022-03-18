@@ -2,5 +2,19 @@
 
 {% block content %}
 {% include 'header.html' %}
-<h1>We are online!</h1>
+{% for quotation in quotations['quotations'] %}
+<h1>{{quotation['character']}}</h1>
+<form id="missing_word">
+    <p>
+        {% for word in quotation['quotation'] %}
+            {% if word != 'X' %}
+                {{word}}
+            {% else %}
+                <input type="text">
+            {% endif %}
+        {% endfor %}
+    </p>
+{% endfor %}
+    <input class="btn btn-primary" type="submit" value="Submit">
+</form>
 {% endblock %}
