@@ -2,19 +2,37 @@
 
 {% block content %}
 {% include 'header.html' %}
-{% for quotation in quotations['quotations'] %}
-<h1>{{quotation['character']}}</h1>
-<form id="missing_word">
-    <p>
-        {% for word in quotation['quotation'] %}
-            {% if word != 'X' %}
-                {{word}}
-            {% else %}
-                <input type="text">
-            {% endif %}
+<div class="fluid-container">
+    <div class="row">
+        <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
+        <div class="col-xxl-4 col-xl-6 col-sm-10 mt-5 bg-light shadow-lg rounded results">
+            {% set x = 30  %}
+            {% for quotation in quotations['quotations'] %}
+
+                <h1>{{quotation['character']}}</h1>
+                <h2>{{x}}</h2>
+
+                    <p class="row p-3">
+                        <form id="missing_word p-3" action="{{ url_for('learn_quotations', quotation_no = quotation) }}" method="post">
+                        {% for word in quotation['quotation'] %}
+                            {% if word != 'X' %}
+                                {{word}}
+                            {% else %}
+                                <input type="text" class="form-control-sm col-xs-1 mx-1" name="filled_gap">
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+            <input class="btn btn-primary" type="submit" value="Submit" id="submit_attempt">
+            </form>
+            {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+        <p>{{ message }}</p>
         {% endfor %}
-    </p>
-{% endfor %}
-    <input class="btn btn-primary" type="submit" value="Submit">
-</form>
+    {% endif %}
+    {% endwith %}
+            {% endfor %}
+
+
+        <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
 {% endblock %}

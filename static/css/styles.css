@@ -6,10 +6,7 @@ img {
 border-radius: 25px 25px 0px 0px !important;
 }
 
-input {
-background-color: black !important;
-color: #f1f4f8 !important;
-}
+
 
 body {
 background-color: #FF3CAC;
@@ -18,3 +15,7 @@ background-repeat: no-repeat;
 background-attachment: fixed;
 }
 
+#submit {
+background-color: black !important;
+color: #f1f4f8 !important;
+}
