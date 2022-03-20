@@ -1,6 +1,5 @@
 import copy
 import json
-
 from flask import Flask, render_template, request, jsonify, session, flash
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
@@ -9,7 +8,6 @@ import os
 import api_communicator
 import random
 import ast
-import sys
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -61,16 +59,16 @@ def learn_quotations():
     if request.method == 'POST':
         request_info = request.values.to_dict()
         print(request_info)
-        request_info_as_dict = ast.literal_eval(request_info['quotation_no'])
-        quotation_id = request_info_as_dict['id']
-        request_quotation_list = request_info_as_dict['quotation']
-        word_gap = request_quotation_list.index("X")
+        #request_info_as_dict = ast.literal_eval(request_info['quotation_no'])
+        #quotation_id = request_info_as_dict['id']
+        #request_quotation_list = request_info_as_dict['quotation']
+        #word_gap = request_quotation_list.index("X")
 
-        original_quotation = [quote for quote in quotations_to_learn if quote['id'] == quotation_id]
-        print(original_quotation[0]['quotation'][word_gap])
+        #original_quotation = [quote for quote in quotations_to_learn if quote['id'] == quotation_id]
+        #print(original_quotation[0]['quotation'][word_gap])
 
-        if original_quotation[0]['quotation'][word_gap] == request_info['filled_gap']:
-            print('correct')
+        #if original_quotation[0]['quotation'][word_gap] == request_info['filled_gap']:
+        #    print('correct')
     return render_template("learn_quotations.html", quotations=quotations_to_complete, space=" ")
 
 
