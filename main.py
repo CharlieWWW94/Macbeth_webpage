@@ -28,7 +28,6 @@ def home():
     if form.validate_on_submit():
         list_search_params = list(form.data.items())
         test = api_communicator.search(list_search_params)
-        print(test)
         session['quotations'] = test['quotations']
         return display_results(test)
 
@@ -47,6 +46,7 @@ def select_difficulty():
 @app.route("/learn_quotations", methods=["GET", "POST"])
 def learn_quotations():
     quotations_to_learn = session.get('quotations', None)
+
     for quotation in quotations_to_learn:
         quotation_as_list = quotation['quotation'].split()
         quotation['quotation'] = quotation_as_list
@@ -63,6 +63,22 @@ def learn_quotations():
     if request.method == 'POST':
         request_info = request.values.to_dict()
         print(request_info)
+        quotations_from_page = ast.literal_eval(request_info['quotations'])
+
+
+        for entry in quotations_from_page['quotations']:
+            index = quotations_from_page['quotations'].index(entry)
+            gap_to_fill = entry['quotation'].index('X')
+            entry['quotation'][gap_to_fill] = request_info[str(index)]
+
+        print(quotations_from_page['quotations'])
+        print(quotations_to_learn)
+
+        if quotations_from_page['quotations'] == quotations_to_learn:
+            print('Woohoo!')
+
+
+        #print(type(quotation_list_2))
         #request_info_as_dict = ast.literal_eval(request_info['quotation_no'])
         #quotation_id = request_info_as_dict['id']
         #request_quotation_list = request_info_as_dict['quotation']

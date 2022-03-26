@@ -6,7 +6,7 @@
     <div class="row">
         <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
         <div class="col-xxl-4 col-xl-6 col-sm-10 mt-5 bg-light shadow-lg rounded results">
-            <form id="missing_word p-3" action="{{ url_for('learn_quotations', quotations = quotations['quotations']) }}" method="post">
+            <form id="missing_word p-3" action="{{ url_for('learn_quotations', quotations=quotations) }}" method="post">
                 {% for number in range(quotations['quotations']|length) %}
                     <h1>{{quotations['quotations'][number]['character']}}</h1>
                     <h2>{{number + 1}}</h2>
@@ -15,7 +15,7 @@
                             {% if word != 'X' %}
                                 {{word}}
                             {% else %}
-                                <input type="text" class="form-control-sm col-xs-1 mx-1" name="filled_gap {{number}}">
+                                <input type="text" class="form-control-sm col-xs-1 mx-1" name="{{number}}">
                             {% endif %}
                         {% endfor %}
                     </p>
