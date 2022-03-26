@@ -39,6 +39,10 @@ def home():
 def display_results(results):
     return render_template("search_results.html", results=results)
 
+@app.route("/select_difficulty")
+def select_difficulty():
+    return render_template("select_difficulty.html")
+
 
 @app.route("/learn_quotations", methods=["GET", "POST"])
 def learn_quotations():
@@ -70,7 +74,6 @@ def learn_quotations():
         #if original_quotation[0]['quotation'][word_gap] == request_info['filled_gap']:
         #    print('correct')
     return render_template("learn_quotations.html", quotations=quotations_to_complete, space=" ")
-
 
 if __name__ == "__main__":
     app.run(debug=True)
