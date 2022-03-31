@@ -77,18 +77,16 @@ def learn_quotations():
         if quotations_from_page['quotations'] == quotations_to_learn:
             print('Woohoo!')
 
+            #The below code will be used for a quick fire game for a single quotation, this will be a separate option though.
 
-        #print(type(quotation_list_2))
-        #request_info_as_dict = ast.literal_eval(request_info['quotation_no'])
-        #quotation_id = request_info_as_dict['id']
-        #request_quotation_list = request_info_as_dict['quotation']
-        #word_gap = request_quotation_list.index("X")
+        #if quotations_from_page['quotations'] == quotations_to_learn:
+         #   print('Woohoo!')
+          #  coaching_message = random.choice(['You got it! Keep going!', 'Amazing! Keep it up', "You're smashing it bro!", "My Guy!", "I see you shining..."])
+          #  return render_template("learn_quotations.html", quotations=quotations_to_complete, space=" ", coaching_message=coaching_message, result="Correct")
+        #else:
+         #   coaching_message = random.choice(["missed it, but keep going!", "We miss 100% of the shots we never take", "fuck the haters, keep grinding"])
+          #  return render_template("learn_quotations.html", quotations=quotations_to_complete, space= " ", coaching_message=coaching_message, result="Incorrect")
 
-        #original_quotation = [quote for quote in quotations_to_learn if quote['id'] == quotation_id]
-        #print(original_quotation[0]['quotation'][word_gap])
-
-        #if original_quotation[0]['quotation'][word_gap] == request_info['filled_gap']:
-        #    print('correct')
     return render_template("learn_quotations.html", quotations=quotations_to_complete, space=" ")
 
 if __name__ == "__main__":

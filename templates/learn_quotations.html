@@ -18,6 +18,11 @@
                                 <input type="text" class="form-control-sm col-xs-1 mx-1" name="{{number}}">
                             {% endif %}
                         {% endfor %}
+                        {% if result == "Correct" %}
+                            <p class="text-success">{{coaching_message}}</p>
+                        {% else %}
+                            <p class="text-danger">{{coaching_message}}</p>
+                        {% endif %}
                     </p>
                 {% endfor %}
                 <input class="btn btn-primary" type="submit" value="Submit" id="submit_attempt">
