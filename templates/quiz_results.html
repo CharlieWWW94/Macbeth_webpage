@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+
+
+
+{% block content %}
+{% include 'header.html' %}
+<link rel="stylesheet" href="static\css\styles.css">
+<div class="fluid-container">
+    <div class="row">
+        <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
+        <div class="col-xxl-4 col-xl-6 col-sm-10 mt-5 bg-light shadow-lg rounded results">
+            <h1>Your Results:</h1>
+            <br>
+            {% for quotation in answers%}
+            <h2>{{quotation['character']}}</h2>
+        <h3>Act: {{quotation['act']}} Scene: {{quotation['scene']}}</h3>
+            {%if quotation['correct'] == 1 %}
+            <p class="text-success">Correct!</p>
+            <p>{{quotation['quotation']}}</p>
+            {% else %}
+            <p class="text-danger">Incorrect</p>
+            <p>Your answer:</p>
+            <p class="text-warning">{{quotation['quotation']}}</p>
+            <br>
+            <p>Correct answer:</p>
+            <p class="text-success">{{quotation['correct_answer']}}</p>
+            {% endif %}
+        <p>{{quotation['theme_1']}} {{quotation['theme_2']}} {{quotation['theme_3']}}</p>
+        <br>
+            <hr>
+            {% endfor %}
+        </div>
+        <div class="col-xxl-4 col-xl-3 col-sm-1"><a href="{{url_for('learn_quotations')}}"><button type="button" class="btn btn-primary mt-5">Click to play again</button></a></div>
+    </div>
+</div>
+{% endblock %}
+
