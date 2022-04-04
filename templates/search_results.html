@@ -18,10 +18,11 @@
         <p>{{quotation['quotation']}}</p>
         <p>{{quotation['theme_1']}} {{quotation['theme_2']}} {{quotation['theme_3']}}</p>
         <br>
+            <a href="{{url_for('quick_learn', target_quotation=quotation)}}"><button class="btn btn-warning">Quick Learn</button></a>
             <hr>
             {% endfor %}
         </div>
-        <div class="col-xxl-4 col-xl-3 col-sm-1"><a href="{{url_for('learn_quotations')}}"><button type="button" class="btn btn-primary mt-5">Learn these quotations</button></a></div>
+        <div class="col-xxl-4 col-xl-3 col-sm-1"><a href="{{url_for('select_difficulty')}}"><button type="button" class="btn btn-primary mt-5">Learn these quotations</button></a></div>
     </div>
 </div>
 {% endblock %}
