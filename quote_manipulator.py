@@ -4,8 +4,9 @@ import random
 
 def create_gaps(quotations_to_learn, difficulty):
     for quotation in quotations_to_learn:
-        quotation_as_list = quotation['quotation'].split()
-        quotation['quotation'] = quotation_as_list
+        if type(quotation['quotation']) != list:
+            quotation_as_list = quotation['quotation'].split()
+            quotation['quotation'] = quotation_as_list
 
     quotations_to_edit = copy.deepcopy(quotations_to_learn)
     quotations_for_completion = {'quotations': []}
