@@ -57,12 +57,15 @@ def quick_learn(target_quotation, attempt_tally=1):
         gap_to_fill = qf_to_complete['quotations'][0]['quotation'].index('X')
         qf_to_complete['quotations'][0]['quotation'][gap_to_fill] = quick_request_info[str("gap")]
 
-        if qf_to_complete['quotations'][0] == qf_dict_list:
-            pass
+        if qf_to_complete['quotations'][0] == qf_dict_list[0]:
+            answer_result = 1
+        else:
+            answer_result = 0
+
         quick_quotation_new = quote_manipulator.create_gaps(qf_dict_list, difficulty='easy')
 
         return render_template("quick_learn.html", quotation=quick_quotation_new, attempt_tally=int(new_tally),
-                               original_quotation=qf_dict_list)
+                               original_quotation=qf_dict_list, answer_result=answer_result)
 
     quick_quotation_list = [ast.literal_eval(target_quotation)]
     quick_quotation = quote_manipulator.create_gaps(quick_quotation_list, difficulty='easy')
