@@ -2,6 +2,7 @@
 
 {% block content %}
 {% include 'header.html' %}
+<link rel="stylesheet" href="static\css\styles.css">
 <div class="fluid-container">
     <div class="row">
         <div class="col-xxl-4 col-xl-3 col-sm-1"></div>
@@ -9,18 +10,18 @@
             <form id="missing_word p-3" action="{{ url_for('learn_quotations', difficulty=difficulty, quotations=quotations) }}" method="post">
                 {% set x_index = namespace(value=0) %}
                 {% for number in range(quotations['quotations']|length) %}
+                <h2>{{number + 1}}</h2>
                     <h1>{{quotations['quotations'][number]['character']}}</h1>
-                    <h2>{{number + 1}}</h2>
-                    <p class="row p-3">
+                <h3>Act: {{quotations['quotations'][number]['act']}} Scene: {{quotations['quotations'][number]['scene']}}</h3>
                         {% for word in quotations['quotations'][number]['quotation'] %}
                             {% if word != 'X' %}
-                                {{word}}
+                                <span>{{word}}</span>
                             {% else %}
-                                <input type="text" class="form-control-sm col-xs-1 mx-1" name="{{x_index.value}}">
+                                <input type="text" class="form-control-sm col-xs-1 mx-1 mt-1" name="{{x_index.value}}">
                                 {% set x_index.value = x_index.value + 1 %}
                             {% endif %}
                         {% endfor %}
-                    </p>
+                <hr>
                 {% endfor %}
                 <input class="btn btn-primary" type="submit" value="Submit" id="submit_attempt">
             </form>
