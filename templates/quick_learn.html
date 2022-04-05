@@ -13,6 +13,11 @@
             <h1>Quick Learn:</h1>
             <h2>Complete the gaps as they appear!</h2>
             <p>Attempt: {{attempt_tally}}/25</p>
+            {% if answer_result == 1 %}
+                <div class="alert alert-success">Correct!</div>
+            {% elif answer_result == 0 %}
+                <div class="alert alert-danger">Incorrect!</div>
+            {% endif %}
             <br>
             <h2>{{quotation['quotations'][0]['character']}}</h2>
         <h3>Act: {{quotation['quotations'][0]['act']}} Scene: {{quotation['scene']}}</h3>
