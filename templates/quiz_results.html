@@ -16,12 +16,12 @@
             <h2>{{quotation['character']}}</h2>
         <h3>Act: {{quotation['act']}} Scene: {{quotation['scene']}}</h3>
             {%if quotation['correct'] == 1 %}
-            <p class="text-success">Correct!</p>
+            <div class="alert alert-success">Correct!</div>
             <p>{{quotation['quotation']}}</p>
             {% else %}
-            <p class="text-danger">Incorrect</p>
+            <div class="alert alert-danger">Incorrect</div>
             <p>Your answer:</p>
-            <p class="text-warning">{{quotation['quotation']}}</p>
+            <p class="text-danger">{{quotation['quotation']}}</p>
             <br>
             <p>Correct answer:</p>
             <p class="text-success">{{quotation['correct_answer']}}</p>
