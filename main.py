@@ -41,9 +41,34 @@ def display_results(results):
 
 
 @app.route("/quick_learn/<target_quotation>", methods=["GET", "POST"])
-def quick_learn(target_quotation):
-    print(target_quotation)
-    return "Hello!"
+def quick_learn(target_quotation, attempt_tally=1):
+
+    if request.method == "POST":
+        # this is all submitted info minus the target quotation
+        quick_request_info = request.values.to_dict()
+        new_tally = quick_request_info['attempt_tally']
+
+        # This is the complete quotation to verify answer again. Type: list
+        qf_dict_list = [ast.literal_eval(target_quotation)]
+
+        # This is the quotation with Xs in it to replace with the submission
+        qf_to_complete = ast.literal_eval(quick_request_info['old_target'])
+
+        gap_to_fill = qf_to_complete['quotations'][0]['quotation'].index('X')
+        qf_to_complete['quotations'][0]['quotation'][gap_to_fill] = quick_request_info[str("gap")]
+
+        if qf_to_complete['quotations'][0] == qf_dict_list:
+            pass
+        quick_quotation_new = quote_manipulator.create_gaps(qf_dict_list, difficulty='easy')
+
+        return render_template("quick_learn.html", quotation=quick_quotation_new, attempt_tally=int(new_tally),
+                               original_quotation=qf_dict_list)
+
+    quick_quotation_list = [ast.literal_eval(target_quotation)]
+    quick_quotation = quote_manipulator.create_gaps(quick_quotation_list, difficulty='easy')
+
+    return render_template("quick_learn.html", quotation=quick_quotation, attempt_tally=attempt_tally,
+                           original_quotation=quick_quotation_list)
 
 
 @app.route("/select_difficulty")
@@ -54,21 +79,8 @@ def select_difficulty():
 @app.route("/learn_quotations/<difficulty>", methods=["GET", "POST"])
 def learn_quotations(difficulty):
     quotations_to_learn = session.get('quotations', None)
-    #print(quote_manipulator.create_gaps(quotations_to_learn, difficulty='medium'))
-    # This section of code creates the gap-fill exercises
+    print(f"quoations to learn: {quotations_to_learn}")
     quotations_to_complete = quote_manipulator.create_gaps(quotations_to_learn, difficulty=difficulty)
-    # for quotation in quotations_to_learn:
-    #     quotation_as_list = quotation['quotation'].split()
-    #     quotation['quotation'] = quotation_as_list
-    #
-    # quotations_to_edit = copy.deepcopy(quotations_to_learn)
-    # quotations_to_complete = {'quotations': []}
-    #
-    # for quotation in quotations_to_edit:
-    #     to_remove = random.randint(0, int(len(quotation['quotation']) - 1))
-    #     quotation_to_complete = quotation
-    #     quotation_to_complete['quotation'][to_remove] = 'X'
-    #     quotations_to_complete['quotations'].append(quotation_to_complete)
 
     # This section of code processes the result
 
@@ -81,7 +93,7 @@ def learn_quotations(difficulty):
         index = 0
         for entry in quotations_from_page['quotations']:
             print(entry)
-            #index = quotations_from_page['quotations'].index(entry)
+            # index = quotations_from_page['quotations'].index(entry)
             for num in range(0, entry['quotation'].count('X')):
                 gap_to_fill = entry['quotation'].index('X')
                 entry['quotation'][gap_to_fill] = request_info[str(index)]
@@ -89,21 +101,6 @@ def learn_quotations(difficulty):
 
         return redirect(url_for("quiz_results", submitted_answers=quotations_from_page["quotations"],
                                 quotations_to_learn=quotations_to_learn, difficulty=difficulty))
-
-        # At this point let's redirect to a results page. Be sure to pass in both quotations from page and quotations to learn.
-
-        # if quotations_from_page['quotations'] == quotations_to_learn:
-        #   print('Woohoo!')
-
-        # The below code will be used for a quick fire game for a single quotation, this will be a separate option though.
-
-        # if quotations_from_page['quotations'] == quotations_to_learn:
-        #   print('Woohoo!')
-        #  coaching_message = random.choice(['You got it! Keep going!', 'Amazing! Keep it up', "You're smashing it bro!", "My Guy!", "I see you shining..."])
-        #  return render_template("learn_quotations.html", quotations=quotations_to_complete, space=" ", coaching_message=coaching_message, result="Correct")
-        # else:
-        #   coaching_message = random.choice(["missed it, but keep going!", "We miss 100% of the shots we never take", "fuck the haters, keep grinding"])
-        #  return render_template("learn_quotations.html", quotations=quotations_to_complete, space= " ", coaching_message=coaching_message, result="Incorrect")
 
     return render_template("learn_quotations.html", difficulty=difficulty, quotations=quotations_to_complete, space=" ")
 
@@ -131,7 +128,8 @@ def quiz_results(submitted_answers, quotations_to_learn, difficulty):
             entry['correct_answer'] = " ".join(quotations_to_learn_list[entry_location]['quotation'])
             entry['quotation'] = " ".join(entry['quotation'])
 
-    return render_template("quiz_results.html", answers=submitted_answers_list, to_learn=quotations_to_learn, difficulty=difficulty)
+    return render_template("quiz_results.html", answers=submitted_answers_list, to_learn=quotations_to_learn,
+                           difficulty=difficulty)
 
 
 if __name__ == "__main__":
