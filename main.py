@@ -42,7 +42,6 @@ def display_results(results):
 
 @app.route("/quick_learn/<target_quotation>", methods=["GET", "POST"])
 def quick_learn(target_quotation, attempt_tally=1):
-
     if request.method == "POST":
         # this is all submitted info minus the target quotation
         quick_request_info = request.values.to_dict()
@@ -133,6 +132,16 @@ def quiz_results(submitted_answers, quotations_to_learn, difficulty):
 
     return render_template("quiz_results.html", answers=submitted_answers_list, to_learn=quotations_to_learn,
                            difficulty=difficulty)
+
+
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
 
 
 if __name__ == "__main__":
