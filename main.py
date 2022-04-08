@@ -1,8 +1,12 @@
 import copy
 import json
+import sqlalchemy.exc
 from flask import Flask, render_template, request, jsonify, session, flash, redirect, url_for
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import SubmitField, SelectField
 import os
 import api_communicator
@@ -12,6 +16,14 @@ import quote_manipulator
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+app.config["SQL_TRACK_MODIFICATIONS"] = False
+
+app.config["SQLALCHEMY_BINDS"] = {
+    "savedquotations": "sqlite:///savedquotations.db"
+}
+
+db = SQLAlchemy(app)
 Bootstrap(app)
 
 
@@ -21,6 +33,41 @@ class SearchForm(FlaskForm):
     act = SelectField('Act', choices=['All', 1, 2])
     scene = SelectField('Scene', choices=['All', 1, 2, 3, 4, 5])
     submit = SubmitField('Submit')
+
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True)
+    password = db.Column(db.String(100))
+    qf_attempts = db.Column(db.Integer)
+    qf_avg = db.Column(db.Integer)
+    qf_most_recent = db.Column(db.Integer)
+    q_attempts = db.Column(db.Integer)
+    q_avg = db.Column(db.Integer)
+    q_most_recent = db.Column(db.Integer)
+
+
+class SavedQuotations(db.Model):
+    __bind_key__ = "savedquotations"
+    id = db.Column(db.Integer, primary_key=True)
+    db_q_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer)
+
+
+db.create_all()
+db.session.commit()
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    print('user loading...')
+    if User.query.get(user_id) is None:
+        return
+    else:
+        return User.query.get(user_id)
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -35,8 +82,102 @@ def home():
     return render_template("index.html", form=form)
 
 
-@app.route("/search_results")
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        reg_details = request.values.to_dict()
+        reg_username = reg_details["username"]
+        hashed_reg_password = generate_password_hash(password=reg_details["password"], method='pbkdf2:sha256',
+                                                     salt_length=8)
+
+        new_user = User(username=reg_username, password=hashed_reg_password)
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+
+        except sqlalchemy.exc.IntegrityError:
+            error = "This username is already in use, please try another."
+            return render_template("register.html", error=error)
+        return render_template("login.html", invitation="Please sign in to your new account!")
+    return render_template("register.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        login_details = request.values.to_dict()
+        given_username = login_details['username']
+        given_password = login_details['password']
+        user_to_login = User.query.filter_by(username=given_username).first()
+
+        if user_to_login and check_password_hash(pwhash=user_to_login.password, password=given_password):
+            print('You are logged in!')
+            login_user(user_to_login)
+            return redirect(url_for('load_dashboard'))
+        else:
+            error = "The details provided did not match our database. Please try again."
+            return render_template("login.html", error=error)
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
+
+@app.route("/dashboard", methods=["GET", "POST"])
+@login_required
+def load_dashboard():
+    form = SearchForm()
+
+    user = User.query.filter_by(username=current_user.username).first()
+    user_q_average = user.q_avg
+
+    saved_quotations = SavedQuotations.query.filter_by(user_id=current_user.id).all()
+    saved_quotation_ids = [int(ident.db_q_id) for ident in saved_quotations]
+    api_response_sq = {'quotations': []}
+
+    if len(saved_quotation_ids) != 0:
+        api_response_sq = api_communicator.search(saved_quotation_ids)
+
+    if user_q_average is not None:
+        pb_calc = lambda x: 25 * round(x / 25)
+        user_pb_q_average = pb_calc(user.q_avg)
+        user_pb_recent = pb_calc(user.q_most_recent)
+    else:
+        user_pb_q_average = 0
+        user_pb_recent = 0
+
+    if form.validate_on_submit():
+        list_search_params = list(form.data.items())
+        test = api_communicator.search(list_search_params)
+        session['quotations'] = test['quotations']
+        return display_results(test)
+
+    return render_template("dashboard.html", form=form, user=user, pb_average=user_pb_q_average,
+                           pb_recent=user_pb_recent, dash_qts=api_response_sq)
+
+
+@app.route("/search_results/<results>", methods=["GET", "POST"])
 def display_results(results):
+    if request.method == "POST":
+        save_request = request.values.to_dict()
+        if 'id' in save_request:
+            saved_q_query = SavedQuotations.query.filter_by(db_q_id=save_request['id']).all()
+            duplicate_check = [saved_q for saved_q in saved_q_query if saved_q.user_id == current_user.id]
+
+            if len(duplicate_check) == 0:
+                new_quotation = SavedQuotations(db_q_id=save_request['id'], user_id=current_user.id)
+                db.session.add(new_quotation)
+                db.session.commit()
+                print('saved')
+
+            else:
+                print('not saved')
+
+        return render_template("search_results.html", results=ast.literal_eval(str(results)))
+
     return render_template("search_results.html", results=results)
 
 
@@ -53,6 +194,7 @@ def quick_learn(target_quotation, attempt_tally=1):
         # This is the quotation with Xs in it to replace with the submission
         qf_to_complete = ast.literal_eval(quick_request_info['old_target'])
 
+        # This fills the gaps and then checks if the user submitted answer is correct.
         gap_to_fill = qf_to_complete['quotations'][0]['quotation'].index('X')
         qf_to_complete['quotations'][0]['quotation'][gap_to_fill] = quick_request_info[str("gap")]
 
@@ -62,7 +204,6 @@ def quick_learn(target_quotation, attempt_tally=1):
             answer_result = 0
 
         quick_quotation_new = quote_manipulator.create_gaps(qf_dict_list, difficulty='easy')
-
         return render_template("quick_learn.html", quotation=quick_quotation_new, attempt_tally=int(new_tally),
                                original_quotation=qf_dict_list, answer_result=answer_result)
 
@@ -81,7 +222,7 @@ def select_difficulty():
 @app.route("/learn_quotations/<difficulty>", methods=["GET", "POST"])
 def learn_quotations(difficulty):
     quotations_to_learn = session.get('quotations', None)
-    print(f"quoations to learn: {quotations_to_learn}")
+    print(f"quotations to learn: {quotations_to_learn}")
     quotations_to_complete = quote_manipulator.create_gaps(quotations_to_learn, difficulty=difficulty)
 
     # This section of code processes the result
@@ -130,18 +271,33 @@ def quiz_results(submitted_answers, quotations_to_learn, difficulty):
             entry['correct_answer'] = " ".join(quotations_to_learn_list[entry_location]['quotation'])
             entry['quotation'] = " ".join(entry['quotation'])
 
+    percentage_score = round(quote_manipulator.quiz_percentage(submitted_answers_list))
+    # rounds percentage score to 25 for bootstrap progress bar:
+    pb_calc = lambda x: 25 * round(x / 25)
+
+    # processes of this type should probably go in a separate module... >>>
+    if current_user.is_authenticated:
+
+        user_to_update = User.query.filter_by(username=current_user.username).first()
+        user_to_update.q_most_recent = percentage_score
+        print(f"old q_avg for user = {user_to_update.q_avg}")
+
+        if user_to_update.q_attempts is not None:
+            user_to_update.q_attempts += 1
+        else:
+            user_to_update.q_attempts = 1
+
+        running_avg = quote_manipulator.overall_percentage(attempt_numbers=user_to_update.q_attempts,
+                                                           new_avg=percentage_score,
+                                                           running_avg=user_to_update.q_avg)
+        print(running_avg)
+        user_to_update.q_avg = running_avg
+        db.session.commit()
+        print(f"new q_avg for user = {user_to_update.q_avg}")
+        print(f"Mr Percentage achieved: {user_to_update.q_most_recent}")
+
     return render_template("quiz_results.html", answers=submitted_answers_list, to_learn=quotations_to_learn,
-                           difficulty=difficulty)
-
-
-@app.route("/register")
-def register():
-    return render_template("register.html")
-
-
-@app.route("/login")
-def login():
-    return render_template("login.html")
+                           difficulty=difficulty, percentage=percentage_score, pb=pb_calc(percentage_score))
 
 
 if __name__ == "__main__":
