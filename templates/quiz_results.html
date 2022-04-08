@@ -12,6 +12,9 @@
         <div class="col-xxl-4 col-xl-6 col-sm-10 mt-5 bg-light shadow-lg rounded results">
             <h1>Your Results:</h1>
             <br>
+          <div class="progress">
+  <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: {{pb}}%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{{percentage}}%</div>
+</div>
             {% for quotation in answers%}
             <h2>{{quotation['character']}}</h2>
         <h3>Act: {{quotation['act']}} Scene: {{quotation['scene']}}</h3>
