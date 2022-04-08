@@ -38,5 +38,27 @@ def create_gaps(quotations_to_learn, difficulty):
 
     return quotations_for_completion
 
+
 def verify_answers(answers):
     pass
+
+
+def quiz_percentage(quiz_results):
+    max_score = len(quiz_results)
+    actual_score = 0
+
+    for result in quiz_results:
+        if result["correct"] == 1:
+            actual_score += 1
+
+    percent_score = (actual_score / max_score) * 100
+
+    return percent_score
+
+
+def overall_percentage(running_avg, attempt_numbers, new_avg):
+    if running_avg is None:
+        return new_avg
+    else:
+        new_running_avg = round((running_avg * (attempt_numbers - 1) + new_avg) / attempt_numbers)
+        return new_running_avg
