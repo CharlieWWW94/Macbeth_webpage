@@ -24,12 +24,21 @@
 		</button>
 		<div class="collapse navbar-collapse justify-content-end" id="navOptions">
 		  <ul class="navbar-nav ">
-			<li class="nav-item">
-			  <a class="nav-link active" aria-current="page" href="{{url_for('register')}}"><button class="btn btn-success px-3">Register!</button></a>
-			</li>
-			<li class="nav-item">
-			  <a class="nav-link active" aria-current="page" href="{{url_for('login')}}"><button class="btn btn-primary px-4">Log in</button></a>
-			</li>
+			  {% if current_user.is_authenticated %}
+			  <li class="nav-item">
+			  		<a class="nav-link active" aria-current="page" href="{{url_for('load_dashboard')}}"><button class="btn btn-success px-3">Dashboard</button></a>
+				</li>
+				<li class="nav-item">
+			  		<a class="nav-link active" aria-current="page" href="{{url_for('logout')}}"><button class="btn btn-warning px-4">Log out</button></a>
+				</li>
+			  {% else %}
+				<li class="nav-item">
+			  		<a class="nav-link active" aria-current="page" href="{{url_for('register')}}"><button class="btn btn-success px-3">Register!</button></a>
+				</li>
+				<li class="nav-item">
+			  		<a class="nav-link active" aria-current="page" href="{{url_for('login')}}"><button class="btn btn-primary px-4">Log in</button></a>
+				</li>
+			  {% endif %}
 		  </ul>
 		</div>
 	  </div>
