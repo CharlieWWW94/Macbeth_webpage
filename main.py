@@ -63,7 +63,6 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    print('user loading...')
     if User.query.get(user_id) is None:
         return
     else:
@@ -111,7 +110,6 @@ def login():
         user_to_login = User.query.filter_by(username=given_username).first()
 
         if user_to_login and check_password_hash(pwhash=user_to_login.password, password=given_password):
-            print('You are logged in!')
             login_user(user_to_login)
             return redirect(url_for('load_dashboard'))
         else:
@@ -138,11 +136,8 @@ def delete_account():
 @login_required
 def load_dashboard():
     form = SearchForm()
-
     if request.method == "POST":
         if "to_remove" in request.args.to_dict():
-            print("to remove is here")
-            print(request.args.to_dict())
             id_to_remove = request.args.to_dict()['to_remove']
             quote_to_remove = SavedQuotations.query.filter_by(db_q_id=id_to_remove, user_id=current_user.id).first()
             db.session.delete(quote_to_remove)
@@ -153,7 +148,6 @@ def load_dashboard():
             list_search_params = list(form.data.items())
             test = api_communicator.search(list_search_params)
             session['quotations'] = test['quotations']
-            print(f"This is the original session set: {session['quotations']}")
             return display_results(test)
 
     user = User.query.filter_by(username=current_user.username).first()
@@ -191,11 +185,9 @@ def display_results(results):
                 new_quotation = SavedQuotations(db_q_id=save_request['id'], user_id=current_user.id)
                 db.session.add(new_quotation)
                 db.session.commit()
-                print('saved')
                 return render_template("search_results.html", results=ast.literal_eval(str(results)), saved=1)
 
             else:
-                print('not saved')
                 return render_template("search_results.html", results=ast.literal_eval(str(results)), saved=2)
 
         return render_template("search_results.html", results=ast.literal_eval(str(results)))
@@ -203,7 +195,6 @@ def display_results(results):
 
 @app.route("/quick_learn/<target_quotation>", methods=["GET", "POST"])
 def quick_learn(target_quotation, attempt_tally=1):
-    print(f"This is the target quotation: {target_quotation}")
     if request.method == "POST":
         # this is all submitted info minus the target quotation
 
@@ -232,7 +223,6 @@ def quick_learn(target_quotation, attempt_tally=1):
                 session["ql_score"] = 1
         else:
             answer_result = 1
-        print(f"This is the ql_score: {session['ql_score']}")
         quick_quotation_new = quote_manipulator.create_gaps(qf_dict_list, difficulty='easy')
         return render_template("quick_learn.html", quotation=quick_quotation_new, attempt_tally=int(new_tally),
                                original_quotation=qf_dict_list, answer_result=answer_result)
@@ -247,7 +237,6 @@ def quick_learn(target_quotation, attempt_tally=1):
 @app.route("/quick_learn_result", methods=["GET", "POST"])
 def quick_learn_result():
     target_quotation = request.values.to_dict()["target_quotation"]
-    print(target_quotation)
     total_ql_score = session["ql_score"]
     ql_score_pb = quote_manipulator.progress_bar_percent(total_ql_score) * 4
     return render_template("quick_learn_results.html",
@@ -264,20 +253,17 @@ def select_difficulty():
 @app.route("/learn_quotations/<difficulty>", methods=["GET", "POST"])
 def learn_quotations(difficulty):
     quotations_to_learn = session.get('quotations', None)
-    print(f"quotations to learn: {quotations_to_learn}")
     quotations_to_complete = quote_manipulator.create_gaps(quotations_to_learn, difficulty=difficulty)
 
     # This section of code processes the result
 
     if request.method == 'POST':
         request_info = request.values.to_dict()
-        print(request_info)
         quotations_from_page = ast.literal_eval(request_info['quotations'])
-        print(quotations_from_page)
+
 
         index = 0
         for entry in quotations_from_page['quotations']:
-            print(entry)
             # index = quotations_from_page['quotations'].index(entry)
             for num in range(0, entry['quotation'].count('X')):
                 gap_to_fill = entry['quotation'].index('X')
@@ -294,19 +280,16 @@ def learn_quotations(difficulty):
 def quiz_results(submitted_answers, quotations_to_learn, difficulty):
     submitted_answers_list = ast.literal_eval(submitted_answers)
     quotations_to_learn_list = ast.literal_eval(quotations_to_learn)
-    print(type(submitted_answers_list))
 
     if type(submitted_answers_list) != list:
         submitted_answers_list = [submitted_answers_list]
         quotations_to_learn_list = [quotations_to_learn_list]
-        print(submitted_answers_list)
 
     for entry in submitted_answers_list:
         entry_index = submitted_answers_list.index(entry)
         if entry == quotations_to_learn_list[entry_index]:
             entry['quotation'] = " ".join(entry['quotation'])
             entry['correct'] = 1
-            print(entry)
         else:
             entry['correct'] = 0
             entry_location = submitted_answers_list.index(entry)
@@ -322,7 +305,6 @@ def quiz_results(submitted_answers, quotations_to_learn, difficulty):
 
         user_to_update = User.query.filter_by(username=current_user.username).first()
         user_to_update.q_most_recent = percentage_score
-        print(f"old q_avg for user = {user_to_update.q_avg}")
 
         if user_to_update.q_attempts is not None:
             user_to_update.q_attempts += 1
@@ -332,11 +314,8 @@ def quiz_results(submitted_answers, quotations_to_learn, difficulty):
         running_avg = quote_manipulator.overall_percentage(attempt_numbers=user_to_update.q_attempts,
                                                            new_avg=percentage_score,
                                                            running_avg=user_to_update.q_avg)
-        print(running_avg)
         user_to_update.q_avg = running_avg
         db.session.commit()
-        print(f"new q_avg for user = {user_to_update.q_avg}")
-        print(f"Mr Percentage achieved: {user_to_update.q_most_recent}")
 
     return render_template("quiz_results.html", answers=submitted_answers_list, to_learn=quotations_to_learn,
                            difficulty=difficulty, percentage=percentage_score, pb=pb_calc(percentage_score))

@@ -12,7 +12,6 @@ def search(search_params):
             'scene': search_params[3][1]
 
         }
-        print(f"search params: {search_params}")
 
     else:
         params = {
