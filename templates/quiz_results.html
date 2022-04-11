@@ -26,10 +26,10 @@
                         <p>{{quotation['quotation']}}</p>
                     {% else %}
                         <div class="alert alert-danger">Incorrect</div>
-                        <p>Your answer:</p>
+                        <p class="fw-bolder">Your answer:</p>
                         <p class="text-danger">{{quotation['quotation']}}</p>
                         <br>
-                        <p>Correct answer:</p>
+                        <p class="fw-bolder">Correct answer:</p>
                         <p class="text-success">{{quotation['correct_answer']}}</p>
                     {% endif %}
                     <p>{{quotation['theme_1']}} {{quotation['theme_2']}} {{quotation['theme_3']}}</p>
