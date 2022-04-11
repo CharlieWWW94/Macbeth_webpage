@@ -117,6 +117,7 @@ def login():
         else:
             error = "The details provided did not match our database. Please try again."
             return render_template("login.html", error=error)
+
     return render_template("login.html")
 
 
@@ -126,10 +127,34 @@ def logout():
     return redirect(url_for('home'))
 
 
+@app.route("/delete")
+def delete_account():
+    User.query.filter_by(username=current_user.username).delete()
+    db.session.commit()
+    return redirect(url_for('logout'))
+
+
 @app.route("/dashboard", methods=["GET", "POST"])
 @login_required
 def load_dashboard():
     form = SearchForm()
+
+    if request.method == "POST":
+        if "to_remove" in request.args.to_dict():
+            print("to remove is here")
+            print(request.args.to_dict())
+            id_to_remove = request.args.to_dict()['to_remove']
+            quote_to_remove = SavedQuotations.query.filter_by(db_q_id=id_to_remove, user_id=current_user.id).first()
+            db.session.delete(quote_to_remove)
+            db.session.commit()
+            return redirect(url_for("load_dashboard"))
+
+        elif form.validate_on_submit():
+            list_search_params = list(form.data.items())
+            test = api_communicator.search(list_search_params)
+            session['quotations'] = test['quotations']
+            print(f"This is the original session set: {session['quotations']}")
+            return display_results(test)
 
     user = User.query.filter_by(username=current_user.username).first()
     user_q_average = user.q_avg
@@ -140,6 +165,7 @@ def load_dashboard():
 
     if len(saved_quotation_ids) != 0:
         api_response_sq = api_communicator.search(saved_quotation_ids)
+        session['quotations'] = api_response_sq["quotations"]
 
     if user_q_average is not None:
         pb_calc = lambda x: 25 * round(x / 25)
@@ -148,12 +174,6 @@ def load_dashboard():
     else:
         user_pb_q_average = 0
         user_pb_recent = 0
-
-    if form.validate_on_submit():
-        list_search_params = list(form.data.items())
-        test = api_communicator.search(list_search_params)
-        session['quotations'] = test['quotations']
-        return display_results(test)
 
     return render_template("dashboard.html", form=form, user=user, pb_average=user_pb_q_average,
                            pb_recent=user_pb_recent, dash_qts=api_response_sq)
@@ -172,21 +192,27 @@ def display_results(results):
                 db.session.add(new_quotation)
                 db.session.commit()
                 print('saved')
+                return render_template("search_results.html", results=ast.literal_eval(str(results)), saved=1)
 
             else:
                 print('not saved')
+                return render_template("search_results.html", results=ast.literal_eval(str(results)), saved=2)
 
         return render_template("search_results.html", results=ast.literal_eval(str(results)))
-
-    return render_template("search_results.html", results=results)
 
 
 @app.route("/quick_learn/<target_quotation>", methods=["GET", "POST"])
 def quick_learn(target_quotation, attempt_tally=1):
+    print(f"This is the target quotation: {target_quotation}")
     if request.method == "POST":
         # this is all submitted info minus the target quotation
+
         quick_request_info = request.values.to_dict()
-        new_tally = quick_request_info['attempt_tally']
+        new_tally = int(quick_request_info['attempt_tally'])
+        if new_tally == 2:
+            session["ql_score"] = 0
+        if new_tally == 25:
+            return redirect(url_for("quick_learn_result", target_quotation=target_quotation))
 
         # This is the complete quotation to verify answer again. Type: list
         qf_dict_list = [ast.literal_eval(target_quotation)]
@@ -199,10 +225,14 @@ def quick_learn(target_quotation, attempt_tally=1):
         qf_to_complete['quotations'][0]['quotation'][gap_to_fill] = quick_request_info[str("gap")]
 
         if qf_to_complete['quotations'][0] == qf_dict_list[0]:
-            answer_result = 1
+            answer_result = 2
+            if "ql_score" in session:
+                session["ql_score"] += 1
+            else:
+                session["ql_score"] = 1
         else:
-            answer_result = 0
-
+            answer_result = 1
+        print(f"This is the ql_score: {session['ql_score']}")
         quick_quotation_new = quote_manipulator.create_gaps(qf_dict_list, difficulty='easy')
         return render_template("quick_learn.html", quotation=quick_quotation_new, attempt_tally=int(new_tally),
                                original_quotation=qf_dict_list, answer_result=answer_result)
@@ -212,6 +242,18 @@ def quick_learn(target_quotation, attempt_tally=1):
 
     return render_template("quick_learn.html", quotation=quick_quotation, attempt_tally=attempt_tally,
                            original_quotation=quick_quotation_list)
+
+
+@app.route("/quick_learn_result", methods=["GET", "POST"])
+def quick_learn_result():
+    target_quotation = request.values.to_dict()["target_quotation"]
+    print(target_quotation)
+    total_ql_score = session["ql_score"]
+    ql_score_pb = quote_manipulator.progress_bar_percent(total_ql_score) * 4
+    return render_template("quick_learn_results.html",
+                           bar_percentage=ql_score_pb,
+                           score=total_ql_score,
+                           attempted_q=target_quotation)
 
 
 @app.route("/select_difficulty")

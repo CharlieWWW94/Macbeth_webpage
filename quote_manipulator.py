@@ -56,6 +56,10 @@ def quiz_percentage(quiz_results):
     return percent_score
 
 
+def progress_bar_percent(result):
+    return 25 * (round(result / 25))
+
+
 def overall_percentage(running_avg, attempt_numbers, new_avg):
     if running_avg is None:
         return new_avg
