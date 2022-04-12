@@ -20,5 +20,19 @@ def search(search_params):
         for num in search_params:
             params["id"].append(num)
 
-    quotations = requests.get(url='http://127.0.0.1:5001/search', params=params, headers={'key': os.getenv("API_KEY")})
-    return quotations.json()
+    try:
+        quotations = requests.get(url='http://127.0.0.1:5001/search', params=params,
+                                  headers={'key': os.getenv("API_KEY")})
+        quotations.raise_for_status()
+        return quotations.json()
+
+    except requests.exceptions.HTTPError as errh:
+        return str(errh)
+    except requests.exceptions.ConnectionError as errc:
+        return str(errc)
+    except requests.exceptions.Timeout as errt:
+        return str(errt)
+    except requests.exceptions.RequestException as err:
+        return str(err)
+    except:
+        return "An unidentified error has occurred."

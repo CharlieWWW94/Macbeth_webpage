@@ -75,8 +75,11 @@ def home():
     if form.validate_on_submit():
         list_search_params = list(form.data.items())
         test = api_communicator.search(list_search_params)
-        session['quotations'] = test['quotations']
-        return display_results(test)
+        if type(test) == str:
+            return test
+        else:
+            session['quotations'] = test['quotations']
+            return display_results(test)
 
     return render_template("index.html", form=form)
 
