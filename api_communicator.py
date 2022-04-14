@@ -21,7 +21,7 @@ def search(search_params):
             params["id"].append(num)
 
     try:
-        quotations = requests.get(url='http://127.0.0.1:5001/search', params=params,
+        quotations = requests.get(url='http://macbeth-quote-api.herokuapp.com/search', params=params,
                                   headers={'key': os.getenv("API_KEY")})
         quotations.raise_for_status()
         return quotations.json()
