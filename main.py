@@ -325,4 +325,4 @@ def quiz_results(submitted_answers, quotations_to_learn, difficulty):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
