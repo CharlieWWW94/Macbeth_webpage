@@ -1,4 +1,8 @@
 # macbeth_webpage
+Broken venv prevents this version from running. I have left this repository here to show previous commits/development of the project.
+To see the completed, functional version of this web app visit: https://github.com/CharlieWWW94/macbethqts
+
+
 A web app that allows users to search my API for quotations from the play Macbeth and also practise these quotations by completing gap fill exercises of varying difficulty (easy, medium, hard). Built using Python, Flask, CSS, HTML, Jinja and Bootstrap.
 
 The app now supports:
